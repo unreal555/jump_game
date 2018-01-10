@@ -1,23 +1,32 @@
 # -*- coding: utf-8 -*-
-import os
 import time
+import wda
 import numpy as np
 import matplotlib.pyplot as plt
 import matplotlib.animation as animation
 from PIL import Image
 
+# 截图距离 * time_coefficient = 按键时长
+# time_coefficient:
+#    iphonex: 0.00125
+#    iphone6: 0.00196
+#    iphone6s plus: 0.00120
+time_coefficient = 0.00120
+
+
+c = wda.Client()
+s = c.session()
+
 
 def pull_screenshot():
-    os.system('adb shell screencap -p /sdcard/autojump.png')
-    os.system('adb pull /sdcard/autojump.png .')
+    c.screenshot('autojump.png')
 
 
 def jump(distance):
-    press_time = distance * 1.35
-    press_time = int(press_time)
-    cmd = 'adb shell input swipe 320 410 320 410 ' + str(press_time)
-    print(cmd)
-    os.system(cmd)
+    press_time = distance * time_coefficient
+    press_time = press_time
+    print('press_time = ',press_time)
+    s.tap_hold(200, 200, press_time)
 
 
 fig = plt.figure()
@@ -37,7 +46,7 @@ def update_data():
 def updatefig(*args):
     global update
     if update:
-        time.sleep(1.5)
+        time.sleep(1)
         pull_screenshot()
         im.set_array(update_data())
         update = False
